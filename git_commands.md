@@ -12,6 +12,11 @@
 
 **$ git push -u origin [new_branch]**
 
+***Note- To simplify workflow on your local setup issue command:
+**$ git config --global push.default current
+ Now in future only have to issue command 
+ **$ git push -u   from command line.
+ 
 ## ===== Add existing remote branch to a local repo and track branch: =====
 **$ git fetch** 
 
