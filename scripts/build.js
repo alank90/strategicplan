@@ -60,13 +60,12 @@ require("rimraf")("./dist", function() {
               await writeFile(`dist/css/${cssFile}`, uglified);
             });
 
-            return `Copied /src/css files to /dist/css directory successfully === 
+            return `Copied /src/css files to /dist/css directory successfully 
                     Uglified CSS file(s) Successfully!!! ======= ${checkMark}`;
           } else if (!readDirectory.length) {
             return `Alert. /css directory empty ${warning}
              ====== End CSS Uglify. =====`;
           } // end if/else
-         
         } catch (err) {
           console.log("ERROR:", err);
         }
