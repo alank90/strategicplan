@@ -2,10 +2,8 @@ const fs = require("fs");
 const copydir = require("copy-dir");
 const { promisify } = require("util");
 const updateLinks = require("./updateLinks");
-const uglifyCSS = require("./uglifyCSS");
 const checkMark = "\u2714";
 const warning = "\u2757";
-const pauseHand = "\u270B";
 
 // Convert node fs methods w/callbacks to promises with .then
 const access = promisify(fs.access);
@@ -22,8 +20,7 @@ const imageminJpegtran = require("imagemin-jpegtran");
 const imageminPngquant = require("imagemin-pngquant");
 const imageminGifSicle = require("imagemin-gifsicle");
 
-// Using rimraf to clean up any existing build
-// and uglify & move css files to /dest ===== //
+// ============= Using rimraf to clean up any existing build ============================== //
 require("rimraf")("./dist", function() {
   // and then start rebuilding everything from scratch
   mkdirp("./dist/css", function(err) {
@@ -33,16 +30,45 @@ require("rimraf")("./dist", function() {
       /* jshint ignore:start */
       const uglifyJS = async function() {
         try {
-          // Read Directory and send files to uglifyCSS for processing
-          const files = await readdir("./src/css");
-          files.forEach(function(file, index) {
-            let fileName = files[index];
-            uglifyCSS(fileName);
-          });
+          const readDirectory = await readdir("./src/css");
+          if (readDirectory[0] === "main.css" && readDirectory.length === 1) {
+            console.log("main.css: build and uglify");
+            let uglified = require("uglifycss").processFiles(
+              ["src/css/main.css"],
+              {
+                maxLineLen: 500,
+                expandVars: true
+              }
+            );
 
-          return `=== Uglified CSS file(s) Successfully!!! ======= ${checkMark}`;
+            await writeFile("dist/css/main.css", uglified);
+
+            return `Alert! /css/main.css copied to /dist/css. ${checkMark}
+             ======== End miscOperations. =========`;
+
+            // Copy /src/css to /dist/css folder
+          } else if (readDirectory.length > 0) {
+            console.log("/src/css directory present. Copying to /dist/css...");
+            let uglifiedcss = require("uglifycss");
+            readDirectory.forEach(async cssFile => {
+              console.log(`${cssFile}: build and uglify`);
+              uglified = uglifiedcss.processFiles([`src/css/${cssFile}`], {
+                maxLineLen: 500,
+                expandVars: true
+              });
+
+              await writeFile(`dist/css/${cssFile}`, uglified);
+            });
+
+            return `Copied /src/css files to /dist/css directory successfully === 
+                    Uglified CSS file(s) Successfully!!! ======= ${checkMark}`;
+          } else if (!readDirectory.length) {
+            return `Alert. /css directory empty ${warning}
+             ====== End CSS Uglify. =====`;
+          } // end if/else
+         
         } catch (err) {
-          return console.log("ERROR:", err);
+          console.log("ERROR:", err);
         }
       }; // end uglifyJS async function
       /* jshint ignore:end */
@@ -76,7 +102,7 @@ require("rimraf")("./dist", function() {
 
       // ============== End Browserify Build ========================================//
 
-      // ================== CompressImages ========================================= //
+      // ================== compressImages ========================================= //
       /* jshint ignore:start */
       const compressImages = async function(result) {
         console.log(result);
@@ -90,7 +116,7 @@ require("rimraf")("./dist", function() {
               if (err) {
                 return err;
               } else {
-                imagemin(["src/img/*.{bmp,jpg,jpeg,png,gif,svg}"], "dist/img", {
+                imagemin(["src/img/*.{jpg,png,gif,svg}"], "dist/img", {
                   plugins: [
                     imageminJpegtran(),
                     imageminPngquant({ quality: "65-80" }),
@@ -165,37 +191,24 @@ require("rimraf")("./dist", function() {
       const miscOperations = async function(result) {
         console.log(result);
         try {
-          // Copy CNAM,favicon.ico if present to /dist folder
-          if (fs.existsSync("src/CNAME")) {
-            await copyFile("src/CNAME", "dist/CNAME");
-            console.log(`Copied CNAME. ${checkMark}`);
-          } else {
-            console.log(`No CNAME present. ${warning}`);
-          }
-
-          if (fs.existsSync("src/favicon.ico")) {
-            await copyFile("src/favicon.ico", "dist/favicon.ico");
-            console.log(`Copied favicon.ico. ${checkMark}`);
-          } else {
-            console.log(`No favicon.ico present. ${warning}`);
-          }
+          // Copy CNAME to /dist folder
+          await access("CNAME", fs.constants.R_OK | fs.constants.W_OK);
+          await copyFile("CNAME", "dist/CNAME");
 
           // Copy /src/resources to /dist folder
-          const readDirectory = await readdir("./src/resources");
+          const readDirectory = await readdir("./resources");
 
           if (readDirectory[0] === "foo.txt" && readDirectory.length === 1) {
             return `Alert! /resources only contains foo.txt. Directory not copied to /dist. ${warning}
             ======== End miscOperations. =========`;
           } else if (readDirectory.length > 0) {
-            console.log(
-              "/src/resources directory present. Copying to /dist..."
-            );
-            copydir("src/resources", "dist/resources", err => {
+            console.log("/resources directory present. Copying to /dist...");
+            copydir("resources", "dist/resources", err => {
               if (err) {
                 throw console.log(`err ${warning}`);
               }
             });
-            return `Copied /src/resources to /dist directory successfully ${checkMark}
+            return `Copied /resources to /dist directory successfully ${checkMark}
            ====== End miscOperations. ======`;
           } else if (!readDirectory.length) {
             return `Alert. /resources directory empty ${warning}
@@ -249,7 +262,7 @@ require("rimraf")("./dist", function() {
         })
         .then(result => {
           console.log(result);
-          console.log(`Pause for index.js to bundle and finish ${pauseHand}`);
+          console.log(`Pause for index.js to bundle and finish \u270B`);
           setTimeout(() => {
             // I know this is a kludge!!
             return UpdateFileLinks();
