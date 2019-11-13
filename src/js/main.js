@@ -1,62 +1,35 @@
-// DOM is ready
-$(document).ready(function () {
-    let moreLink = document.createElement("a");
-    let lessLink = document.createElement("a");
-    let allParagraphs = document.getElementsByTagName("p");
-    let firstParagraph = allParagraphs[0];
+// First get the .container DOM object
+const el = document.body.querySelector(".container");
 
-    moreLink.setAttribute("href", "#");
-    moreLink.setAttribute("class", "more-link");
-    moreLink.innerHTML = "Read more";
+// Now attach an Event listener to it. This event will be
+// triggered whenever the mouse enters a step in the graphic.
+el.addEventListener("mouseover", event => {
+  let elementMousedOver = event.target.src;
 
-    firstParagraph.appendChild(moreLink);
+  // now grab the step number from the src attribute value via the regex string
+  elementMousedOver = elementMousedOver.match(/step[0-9]+/gm).toString();
 
-    for (let p of allParagraphs) {
-        if (p != allParagraphs[0]) {
-            p.style.display = "none";
-        }
-    }
+  // Now we want to querySelectorAll the elements to find which of them
+  // we want to apply the hilight stylings to
+  const elementList = document.querySelectorAll(
+    `[class~=${elementMousedOver}]`
+  );
+  elementList.forEach(function(value) {
+    value.classList.add("hilightColBase");
+  });
+});
 
+// Add Event Listener for mouseout of any of the step elements.
+el.addEventListener("mouseout", event => {
+  let elementMousedOutOf = event.target.src;
+  // Grab step number from src attribute
+  elementMousedOutOf = elementMousedOutOf.match(/step[0-9]+/gm).toString();
 
-    // ============ Routine to reveal hidden paragraphs ======== //
+  // Now we want to querySelectorAll the elements to find which of them
+  // we want to remove the hilight stylings from
+  const elementList = document.querySelectorAll("div.hilightColBase");
 
-    $(".more-link").on("click", function () {
-        let lastParagraph = allParagraphs[allParagraphs.length - 1];
-        moreLink.style.display = "none";
-
-        for (let p of allParagraphs) {
-            if (p != allParagraphs[0]) {
-                p.style.display = "block";
-            }
-        }
-
-        lessLink.setAttribute("href", "#");
-        lessLink.setAttribute("class", "less-link");
-        lessLink.innerHTML = "Less";
-        lastParagraph.appendChild(lessLink);
-
-        if (lessLink.style.display === 'none') {
-            lessLink.style.display = "inline-block";
-        }
-
-    });
-
-
-    // ====== Routine to hide paragraphs ============= //
-    // note: we had to handle this with event delegation ==== //
-
-    $("p").on("click", ".less-link", function () {
-        console.log("Clicked less-link button");
-        lessLink.style.display = "none";
-
-        for (let p of allParagraphs) {
-            if (p != allParagraphs[0]) {
-                p.style.display = "none";
-            }
-        }
-
-        moreLink.style.display = "inline-block";
-    });
-
-
-}); // end dom ready
+  elementList.forEach(function(value) {
+    value.classList.remove("hilightColBase");
+  });
+});
