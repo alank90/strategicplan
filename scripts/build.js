@@ -195,6 +195,16 @@ require("rimraf")("./dist", function() {
           await access("CNAME", fs.constants.R_OK | fs.constants.W_OK);
           await copyFile("CNAME", "dist/CNAME");
 
+          // Copy favicon.png to /dist folder
+          await access("./favicon.png", fs.constants.R_OK, async (err) => {
+            if (err) {
+              console.error(`Error. No favicon present. ${err}`)
+            } else {
+               await copyFile("favicon.png", "dist/favicon.png"); 
+               console.log(`favicon present. Copied to /dist ${checkMark}`);
+            }
+          });
+        
           // Copy /src/resources to /dist folder
           const readDirectory = await readdir("./resources");
 

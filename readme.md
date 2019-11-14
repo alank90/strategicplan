@@ -1,4 +1,4 @@
-# Browserify with Budo
+# Stratagicplan and Browserify with Budo 
 Ok so this is the first in a series of git repos that I've created to use as templates for Rapid Prototyping (or rapo) using [Browserify](http://browserify.org) and [Budo](https://github.com/mattdesl/budo).
 
 There's a lot (and I mean a whole lot) of tools out there for Rapid Prototyping (again Rapo) that give you this functionality but I think these two (Browserify and Budo) really put the Rapid into Rapid Prototyping - IMHO.
