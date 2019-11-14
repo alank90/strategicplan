@@ -195,25 +195,18 @@ require("rimraf")("./dist", function() {
           await access("CNAME", fs.constants.R_OK | fs.constants.W_OK);
           await copyFile("CNAME", "dist/CNAME");
 
-          // Copy favicon.png to /dist folder
-          await access("./favicon.png", fs.constants.R_OK, async (err) => {
-            if (err) {
-              console.error(`Error. No favicon present. ${err}`)
-            } else {
-               await copyFile("favicon.png", "dist/favicon.png"); 
-               console.log(`favicon present. Copied to /dist ${checkMark}`);
-            }
-          });
-        
+          await access("favicon.png", fs.constants.R_OK | fs.constants.W_OK);
+          await copyFile("favicon.png", "dist/favicon.png");
+
           // Copy /src/resources to /dist folder
-          const readDirectory = await readdir("./resources");
+          const readDirectory = await readdir("src/resources");
 
           if (readDirectory[0] === "foo.txt" && readDirectory.length === 1) {
             return `Alert! /resources only contains foo.txt. Directory not copied to /dist. ${warning}
             ======== End miscOperations. =========`;
           } else if (readDirectory.length > 0) {
-            console.log("/resources directory present. Copying to /dist...");
-            copydir("resources", "dist/resources", err => {
+            console.log("src/resources directory present. Copying to /dist...");
+            copydir("src/resources", "dist/resources", err => {
               if (err) {
                 throw console.log(`err ${warning}`);
               }
